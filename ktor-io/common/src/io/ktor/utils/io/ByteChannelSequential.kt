@@ -474,7 +474,7 @@ public abstract class ByteChannelSequentialBase(
         return builder.build()
     }
 
-    protected fun readAvailableClosed(): Int {
+    private fun readAvailableClosed(): Int {
         closedCause?.let { throw it }
 
         if (availableForRead > 0) {
@@ -484,9 +484,7 @@ public abstract class ByteChannelSequentialBase(
         return -1
     }
 
-    override suspend fun readAvailable(dst: ChunkBuffer): Int = readAvailable(dst as Buffer)
-
-    internal suspend fun readAvailable(dst: Buffer): Int {
+    override suspend fun readAvailable(dst: ChunkBuffer): Int {
         closedCause?.let { throw it }
         if (closed && availableForRead == 0) return -1
 

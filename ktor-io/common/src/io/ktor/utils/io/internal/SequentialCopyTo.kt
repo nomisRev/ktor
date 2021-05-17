@@ -1,8 +1,7 @@
 package io.ktor.utils.io.internal
 
-import io.ktor.utils.io.ByteChannelSequentialBase
-import io.ktor.utils.io.close
-import io.ktor.utils.io.core.internal.ChunkBuffer
+import io.ktor.utils.io.*
+import io.ktor.utils.io.core.internal.*
 
 internal suspend fun ByteChannelSequentialBase.joinToImpl(dst: ByteChannelSequentialBase, closeOnEnd: Boolean) {
     copyToSequentialImpl(dst, Long.MAX_VALUE)
@@ -47,6 +46,7 @@ internal suspend fun ByteChannelSequentialBase.copyToSequentialImpl(dst: ByteCha
         remainingLimit -= copied
     }
 
+    flush()
     return limit - remainingLimit
 }
 

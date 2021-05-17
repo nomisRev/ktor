@@ -6,10 +6,9 @@ package io.ktor.utils.io
 
 import io.ktor.utils.io.core.*
 import io.ktor.utils.io.core.internal.*
-import kotlinx.coroutines.channels.*
 
 class JvmReadPacketWithExceptionByteChannelCloseTest : ByteChannelCloseTest(
-    ClosedReceiveChannelException::class,
+    EOFException::class,
     { close() },
     { readPacket(Int.MAX_VALUE) }
 )
@@ -25,7 +24,7 @@ class JvmSequentialReadPacketWithExceptionByteChannelCloseTest : ByteChannelClos
 }
 
 class JvmReadFullyWithExceptionByteChannelCloseTest : ByteChannelCloseTest(
-    ClosedReceiveChannelException::class,
+    EOFException::class,
     { close() },
     { readFully(ByteArray(10)) }
 )

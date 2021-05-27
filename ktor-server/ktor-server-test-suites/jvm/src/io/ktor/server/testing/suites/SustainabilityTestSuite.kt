@@ -10,6 +10,7 @@ import io.ktor.client.statement.*
 import io.ktor.features.*
 import io.ktor.http.*
 import io.ktor.http.cio.*
+import io.ktor.http.cio.websocket.*
 import io.ktor.http.content.*
 import io.ktor.request.*
 import io.ktor.response.*
@@ -20,7 +21,9 @@ import io.ktor.util.cio.*
 import io.ktor.utils.io.*
 import io.ktor.utils.io.jvm.javaio.*
 import io.ktor.utils.io.streams.*
+import io.ktor.websocket.*
 import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.*
 import kotlinx.coroutines.debug.*
 import org.junit.runners.model.*
 import org.slf4j.*
@@ -28,8 +31,10 @@ import java.io.*
 import java.net.*
 import java.util.*
 import java.util.concurrent.*
+import java.util.concurrent.CancellationException
 import java.util.concurrent.atomic.*
 import kotlin.concurrent.*
+import kotlin.streams.*
 import kotlin.test.*
 
 abstract class SustainabilityTestSuite<TEngine : ApplicationEngine, TConfiguration : ApplicationEngine.Configuration>(
@@ -798,6 +803,36 @@ abstract class SustainabilityTestSuite<TEngine : ApplicationEngine, TConfigurati
             assertEquals(ContentType.Text.Plain, contentType()?.withoutParameters())
             val result = content.toInputStream().crcWithSize()
             assertEquals(10000 * 13L, result.second)
+        }
+    }
+
+    @Test
+    fun testDoubleHost() {
+        createAndStartServer {
+            get("/") {
+                call.respond("OK")
+            }
+        }
+
+        socket {
+            val content = """
+                GET / HTTP/1.1
+                Host: www.example.com
+                Host: www.example2.com
+
+
+                """.trimIndent()
+
+            outputStream.bufferedWriter().apply {
+                write(content)
+                flush()
+            }
+
+            val response = inputStream.bufferedReader()
+            val status = response.readLine()
+
+            assertTrue(status.startsWith("HTTP/1.1 400"))
+            outputStream.close()
         }
     }
 }
